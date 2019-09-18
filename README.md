@@ -1,4 +1,4 @@
-* Nuber Client
+## Nuber Client
 
 Client Uber Clone 
 - ReactJS, Apollo, Typescript
