@@ -40,7 +40,7 @@ const client = new ApolloClient({
             headers: {
                 "X-JWT": localStorage.getItem("jwt") || ""
             }
-        })
+        });
     },
     uri: "http://localhost:4000/graphql"
 });
