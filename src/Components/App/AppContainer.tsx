@@ -5,17 +5,8 @@ import { ThemeProvider } from "../../typed-components";
 import AppPresenter from "./AppPresenter";
 import { IS_LOGGED_IN } from "./AppQueries";
 
-// tslint:disable-next-line
-// injectGlobal`
-//     ${reset}
-// `;
-
 const AppContainer = ({ data }) => <ThemeProvider theme={theme}>
-    <>
-        <AppPresenter isLoggedIn={data.auth.isLoggedIn} />
-    </>
+    <AppPresenter isLoggedIn={data.auth.isLoggedIn} />
 </ThemeProvider>
-
-
 
 export default graphql(IS_LOGGED_IN)(AppContainer);
