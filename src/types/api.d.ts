@@ -7,17 +7,17 @@
 // ====================================================
 
 export interface startPhoneVerification_StartPhoneVerification {
-    __typename: "StartPhoneVerificationResponse";
-    ok: boolean;
-    error: string | null;
+  __typename: "StartPhoneVerificationResponse";
+  ok: boolean;
+  error: string | null;
 }
 
 export interface startPhoneVerification {
-    StartPhoneVerification: startPhoneVerification_StartPhoneVerification;
+  StartPhoneVerification: startPhoneVerification_StartPhoneVerification;
 }
 
 export interface startPhoneVerificationVariables {
-    phoneNumber: string;
+  phoneNumber: string;
 }
 
 /* tslint:disable */
@@ -29,21 +29,21 @@ export interface startPhoneVerificationVariables {
 // ====================================================
 
 export interface facebookConnect_FacebookConnect {
-    __typename: "FacebookConnectResponse";
-    ok: boolean;
-    error: string | null;
-    token: string | null;
+  __typename: "FacebookConnectResponse";
+  ok: boolean;
+  error: string | null;
+  token: string | null;
 }
 
 export interface facebookConnect {
-    FacebookConnect: facebookConnect_FacebookConnect;
+  FacebookConnect: facebookConnect_FacebookConnect;
 }
 
 export interface facebookConnectVariables {
-    firstName: string;
-    lastName: string;
-    email?: string | null;
-    fbId: string;
+  firstName: string;
+  lastName: string;
+  email?: string | null;
+  fbId: string;
 }
 
 /* tslint:disable */
@@ -55,19 +55,45 @@ export interface facebookConnectVariables {
 // ====================================================
 
 export interface completePhoneVerification_CompletePhoneVerification {
-    __typename: "CompletePhoneVerificationResponse";
-    ok: boolean;
-    error: string | null;
-    token: string | null;
+  __typename: "CompletePhoneVerificationResponse";
+  ok: boolean;
+  error: string | null;
+  token: string | null;
 }
 
 export interface completePhoneVerification {
-    CompletePhoneVerification: completePhoneVerification_CompletePhoneVerification;
+  CompletePhoneVerification: completePhoneVerification_CompletePhoneVerification;
 }
 
 export interface completePhoneVerificationVariables {
-    key: string;
-    phoneNumber: string;
+  key: string;
+  phoneNumber: string;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL query operation: userProfile
+// ====================================================
+
+export interface userProfile_GetMyProfile_user {
+  __typename: "User";
+  profilePhoto: string | null;
+  fullName: string | null;
+  isDriving: boolean;
+}
+
+export interface userProfile_GetMyProfile {
+  __typename: "GetMyProfileResponse";
+  ok: boolean;
+  error: string | null;
+  user: userProfile_GetMyProfile_user | null;
+}
+
+export interface userProfile {
+  GetMyProfile: userProfile_GetMyProfile;
 }
 
 /* tslint:disable */

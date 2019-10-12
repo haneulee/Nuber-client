@@ -1,5 +1,2 @@
-import React from "react";
-
-const test = () => <span>blaafaf</span>
-
-export default test;
+import HomeContainer from "./HomeContainer";
+export default HomeContainer;
