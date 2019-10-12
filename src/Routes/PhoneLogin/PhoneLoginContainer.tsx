@@ -1,5 +1,5 @@
 import React from "react";
-import { Mutation } from "react-apollo";
+import { Mutation, MutationFunction } from "react-apollo";
 import { RouteComponentProps } from "react-router-dom";
 import { toast } from "react-toastify";
 import PhoneLoginPresenter from "./PhoneLoginPresenter";
@@ -21,7 +21,7 @@ class PhoneLoginContainer extends React.Component<
     RouteComponentProps<any>,
     IState
     > {
-    public phoneMutation: any;
+    public phoneMutation: MutationFunction;
     public state = {
         countryCode: "+82",
         phoneNumber: ""

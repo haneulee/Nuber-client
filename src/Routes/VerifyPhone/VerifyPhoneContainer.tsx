@@ -3,7 +3,7 @@ import { Mutation } from "react-apollo";
 import { RouteComponentProps } from "react-router-dom";
 import { toast } from "react-toastify";
 import { LOG_USER_IN } from "../../sharedQueries.local";
-import { CompletePhoneVerification, CompletePhoneVerificationVariables } from "../../types/api";
+import { completePhoneVerification, completePhoneVerificationVariables } from "../../types/api";
 import VerifyPhonePresenter from "./VerifyPhonePresenter";
 import { VERIFY_PHONE } from "./VerifyPhoneQueries";
 
@@ -13,8 +13,6 @@ interface IState {
 }
 
 interface IProps extends RouteComponentProps<any> { }
-
-// class VerifyMutation extends Mutation<CompletePhoneVerification, CompletePhoneVerificationVariables> { }
 
 class VerifyPhoneContainer extends React.Component<IProps, IState> {
     constructor(props: IProps) {
@@ -29,19 +27,16 @@ class VerifyPhoneContainer extends React.Component<IProps, IState> {
     }
     public render() {
         const { verificationKey, phoneNumber } = this.state;
-        //tslint:disable
-        console.log("verifyphonecontainer ====== ", this.state)
         return (
             <Mutation mutation={LOG_USER_IN}>
                 {logUserIn => (
-                    <Mutation<CompletePhoneVerification, CompletePhoneVerificationVariables >
+                    <Mutation<completePhoneVerification, completePhoneVerificationVariables >
                     mutation= { VERIFY_PHONE }
-                    variables={{
+                        variables={{
                     key: verificationKey,
                     phoneNumber
                 }}
                 onCompleted={data => {
-                    // tslint:disable: no-shadowed-variable
                     const { CompletePhoneVerification } = data;
                     if (CompletePhoneVerification.ok) {
                         if (CompletePhoneVerification.token) {
@@ -57,7 +52,7 @@ class VerifyPhoneContainer extends React.Component<IProps, IState> {
                     }
                 }}
                 >
-                        {(mutation, { loading }) => (
+                    {(mutation, { loading }) => (
                     <VerifyPhonePresenter
                         onSubmit={mutation}
                         onChange={this.onInputChange}
@@ -65,7 +60,8 @@ class VerifyPhoneContainer extends React.Component<IProps, IState> {
                         loading={loading}
                     />
                 )}
-            </Mutation>)
+            </Mutation>
+        )
     }
             </Mutation>
         );
