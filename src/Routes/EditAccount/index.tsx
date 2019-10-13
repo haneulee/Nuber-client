@@ -1,5 +1,2 @@
-import React from "react";
-
-const test = () => <span>blaafaf</span>
-
-export default test;
+import EditAccountContainer from "./EditAccountContainer";
+export default EditAccountContainer;
