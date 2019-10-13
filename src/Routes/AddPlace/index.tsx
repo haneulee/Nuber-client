@@ -1,5 +1,2 @@
-import React from "react";
-
-const test = () => <span>blaafaf</span>
-
-export default test;
+import AddPlaceContainer from "./AddPlaceContainer";
+export default AddPlaceContainer;

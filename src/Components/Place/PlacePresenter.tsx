@@ -1,4 +1,5 @@
 import React from "react";
+import { MutationFunction } from "react-apollo";
 import styled from "../../typed-components";
 
 const Place = styled.div`
@@ -31,16 +32,22 @@ interface IProps {
     fav: boolean;
     name: string;
     address: string;
+    onStarPress: MutationFunction;
 }
 
-const PlacePresenter: React.SFC<IProps> = ({ fav, name, address }) => (
-    <Place>
-        <Icon>{fav ? "✩" : "★"}</Icon>
-        <Container>
-            <Name>{name}</Name>
-            <Address>{address}</Address>
-        </Container>
-    </Place>
-);
+const PlacePresenter: React.SFC<IProps> = ({
+    onStarPress,
+    fav,
+    name,
+    address
+}) => (
+        <Place>
+            <Icon onClick={onStarPress as any}>{fav ? "★" : "✩"}</Icon>
+            <Container>
+                <Name>{name}</Name>
+                <Address>{address}</Address>
+            </Container>
+        </Place>
+    );
 
 export default PlacePresenter;
