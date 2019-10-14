@@ -2,14 +2,18 @@ import React from "react";
 import ReactDOM from "react-dom";
 import FindAddressPresenter from "./FindAddressPresenter";
 import { reverseGeoCode, geoCode } from "../../mapHelpers";
+import { RouteComponentProps } from "react-router";
 
 interface IState {
     lat: number;
     lng: number;
     address: string;
 }
+interface IProps extends RouteComponentProps<any> {
+    google: any;
+}
 
-class FindAddressContainer extends React.Component<any, IState> {
+class FindAddressContainer extends React.Component<IProps, IState> {
     public mapRef: any;
     public map: google.maps.Map;
     public state = {
@@ -35,10 +39,11 @@ class FindAddressContainer extends React.Component<any, IState> {
                 address={address}
                 onInputChange={this.onInputChange}
                 onInputBlur={this.onInputBlur}
+                onPickPlace={this.onPickPlace}
             />
         );
     }
-    public handleGeoSuccess = (positon: Position) => {
+    public handleGeoSuccess: PositionCallback = (positon: Position) => {
         const {
             coords: { latitude, longitude }
         } = positon;
@@ -49,7 +54,7 @@ class FindAddressContainer extends React.Component<any, IState> {
         this.loadMap(latitude, longitude);
         this.reverseGeocodeAddress(latitude, longitude);
     };
-    public handleGeoError = () => {
+    public handleGeoError: PositionErrorCallback = () => {
         console.log("No location");
     };
     public loadMap = (lat, lng) => {
@@ -108,6 +113,19 @@ class FindAddressContainer extends React.Component<any, IState> {
                 address: reversedAddress
             });
         }
+    };
+    public onPickPlace = () => {
+        const { address, lat, lng } = this.state;
+        const { history } = this.props;
+        history.push({
+            pathname: "/add-place",
+            state: {
+                address,
+                lat,
+                lng
+            }
+        });
+        // console.log(address, lat, lng);
     };
 }
 
