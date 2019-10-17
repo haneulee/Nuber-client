@@ -8,6 +8,10 @@ export const geoCode = async (address: string) => {
     if (!data.error_message) {
         const { results } = data;
         const firstPlace = results[0];
+        if (!firstPlace) {
+            return false;
+        }
+
         const {
             formatted_address,
             geometry: {
