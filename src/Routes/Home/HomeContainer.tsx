@@ -145,25 +145,25 @@ class HomeContainer extends React.Component<IProps, IState> {
                                         subscribeToMore(rideSubscriptionOptions);
                                     }
                                     return (
-                                        <Mutation<acceptRide, acceptRideVariables > mutation= { ACCEPT_RIDE } >
-                                        {
-                                            acceptRideFn => (
-                                                <HomePresenter
-                                                    loading={loading}
-                                                    isMenuOpen={isMenuOpen}
-                                                    toggleMenu={this.toggleMenu}
-                                                    mapRef={this.mapRef}
-                                                    toAddress={toAddress}
-                                                    onInputChange={this.onInputChange}
-                                                    price={price}
-                                                    data={data}
-                                                    onAddressSubmit={this.onAddressSubmit}
-                                                    requestRideFn={requestRideFn}
-                                                    nearbyRide={nearbyRide}
-                                                    acceptRideFn={acceptRideFn}
-                                                />
-                                            )
-                                        }
+                                        <Mutation<acceptRide, acceptRideVariables > mutation= { ACCEPT_RIDE } onCompleted = { this.handleRideAcceptance } >
+                                            {
+                                                acceptRideFn => (
+                                                    <HomePresenter
+                                                        loading={loading}
+                                                        isMenuOpen={isMenuOpen}
+                                                        toggleMenu={this.toggleMenu}
+                                                        mapRef={this.mapRef}
+                                                        toAddress={toAddress}
+                                                        onInputChange={this.onInputChange}
+                                                        price={price}
+                                                        data={data}
+                                                        onAddressSubmit={this.onAddressSubmit}
+                                                        requestRideFn={requestRideFn}
+                                                        nearbyRide={nearbyRide}
+                                                        acceptRideFn={acceptRideFn}
+                                                    />
+                                                )
+                                            }
                                                 </Mutation>
 );
 }}
@@ -400,9 +400,11 @@ class HomeContainer extends React.Component<IProps, IState> {
     }
 };
     public handleRideRequest = (data: requestRide) => {
+    const { history } = this.props;
     const { RequestRide } = data;
     if (RequestRide.ok) {
         toast.success("Drive requested, finding a driver");
+        history.push(`/ride/${RequestRide.ride!.id}`);
     } else {
         toast.error(RequestRide.error);
     }
@@ -416,6 +418,13 @@ class HomeContainer extends React.Component<IProps, IState> {
         this.setState({
             isDriving
         });
+    }
+};
+public handleRideAcceptance = (data: acceptRide) => {
+    const { history } = this.props;
+    const { UpdateRideStatus } = data;
+    if (UpdateRideStatus.ok) {
+        history.push(`/ride/${UpdateRideStatus.rideId}`);
     }
 };
 }
