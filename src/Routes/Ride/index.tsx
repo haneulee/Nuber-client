@@ -1,5 +1,2 @@
-import React from "react";
-
-const test = () => <span>blaafaf</span>
-
-export default test;
+import RideContainer from "./RideContainer";
+export default RideContainer;

@@ -7,6 +7,7 @@ import Button from "../../Components/Button";
 import Menu from "../../Components/Menu";
 import styled from "../../typed-components";
 import { userProfile, getRides } from "../../types/api";
+import RidePopUp from "../../Components/RidePopUp";
 
 const Container = styled.div``;
 
@@ -59,6 +60,7 @@ interface IProps {
     onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     requestRideFn?: MutationFunction;
     nearbyRide?: getRides;
+    acceptRideFn?: MutationFunction;
 }
 
 const HomePresenter: React.SFC<IProps> = ({
@@ -71,8 +73,9 @@ const HomePresenter: React.SFC<IProps> = ({
     onAddressSubmit,
     price,
     data: { GetMyProfile: { user = null } = {} } = {},
+    nearbyRide: { GetNearbyRide: { ride = null } = {} } = {},
     requestRideFn,
-    nearbyRide
+    acceptRideFn
 }) => (
         <Container>
             <Helmet>
@@ -112,6 +115,18 @@ const HomePresenter: React.SFC<IProps> = ({
                         onClick={requestRideFn}
                         disabled={toAddress === ""}
                         value={`Request Ride ($${price})`}
+                    />
+                )}
+                {ride && (
+                    <RidePopUp
+                        id={ride.id}
+                        pickUpAddress={ride.pickUpAddress}
+                        dropOffAddress={ride.dropOffAddress}
+                        price={ride.price}
+                        distance={ride.distance}
+                        passengerName={ride.passenger.fullName!}
+                        passengerPhoto={ride.passenger.profilePhoto!}
+                        acceptRideFn={acceptRideFn}
                     />
                 )}
                 <Map ref={mapRef} />

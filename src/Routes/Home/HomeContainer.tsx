@@ -1,3 +1,4 @@
+import { SubscribeToMoreOptions } from "apollo-client";
 import React from "react";
 import { graphql, Mutation, MutationFunction, Query } from "react-apollo";
 import ReactDOM from "react-dom";
@@ -6,6 +7,8 @@ import { toast } from "react-toastify";
 import { geoCode, reverseGeoCode } from "../../mapHelpers";
 import { USER_PROFILE } from "../../sharedQueries";
 import {
+    acceptRide,
+    acceptRideVariables,
     getDrivers,
     getRides,
     reportMovement,
@@ -16,10 +19,12 @@ import {
 } from "../../types/api";
 import HomePresenter from "./HomePresenter";
 import {
+    ACCEPT_RIDE,
     GET_NEARBY_DRIVERS,
     GET_NEARBY_RIDE,
     REPORT_LOCATION,
-    REQUEST_RIDE
+    REQUEST_RIDE,
+    SUBSCRIBE_NEARBY_RIDES
 } from "./HomeQueries";
 
 interface IState {
@@ -45,6 +50,7 @@ interface IProps extends RouteComponentProps<any> {
 // class NearbyQueries extends Query<getDrivers> { }
 // class RequestRideMutation extends Mutation<requestRide, requestRideVariables> { }
 // class GetNearbyRides extends Query<getRides> { }
+// class AcceptRide extends Mutation<acceptRide, acceptRideVariables> { }
 
 class HomeContainer extends React.Component<IProps, IState> {
     public mapRef: any;
@@ -97,8 +103,8 @@ class HomeContainer extends React.Component<IProps, IState> {
                 {({ data, loading }) => (
                     <Query<getDrivers>
                         query={GET_NEARBY_DRIVERS}
-                        pollInterval={1000}
                         skip={isDriving}
+                        pollInterval={5000}
                         onCompleted={this.handleNearbyDrivers}
                         >
                         {() => (
@@ -118,23 +124,49 @@ class HomeContainer extends React.Component<IProps, IState> {
                         }}
                         >
                                 {requestRideFn => (
-                            <Query<getRides>
-                                query={GET_NEARBY_RIDE} skip={isDriving}>
-                                {({ data: nearbyRide }) => (
-                    <HomePresenter
-                        loading={loading}
-                        isMenuOpen={isMenuOpen}
-                        toggleMenu={this.toggleMenu}
-                        mapRef={this.mapRef}
-                        toAddress={toAddress}
-                        onInputChange={this.onInputChange}
-                                        price={price}
-                                        data={data}
-                        onAddressSubmit={this.onAddressSubmit}
-                                        requestRideFn={requestRideFn}
-                                        nearbyRide={nearbyRide}
-                    />
-                )}
+                            <Query<getRides> query={GET_NEARBY_RIDE} skip={!isDriving}>
+                                        {({ subscribeToMore, data: nearbyRide }) => {
+                                    const rideSubscriptionOptions: SubscribeToMoreOptions = {
+                                        document: SUBSCRIBE_NEARBY_RIDES,
+                                        updateQuery: (prev, { subscriptionData }) => {
+                                            if (!subscriptionData.data) {
+                                                return prev;
+                                            }
+                                            const newObject = Object.assign({}, prev, {
+                                                GetNearbyRide: {
+                                                    ...prev.GetNearbyRide,
+                                                    ride: subscriptionData.data.NearbyRideSubscription
+                                                }
+                                            });
+                                            return newObject;
+                                        }
+                                    };
+                                    if (isDriving) {
+                                        subscribeToMore(rideSubscriptionOptions);
+                                    }
+                                    return (
+                                        <Mutation<acceptRide, acceptRideVariables > mutation= { ACCEPT_RIDE } >
+                                        {
+                                            acceptRideFn => (
+                                                <HomePresenter
+                                                    loading={loading}
+                                                    isMenuOpen={isMenuOpen}
+                                                    toggleMenu={this.toggleMenu}
+                                                    mapRef={this.mapRef}
+                                                    toAddress={toAddress}
+                                                    onInputChange={this.onInputChange}
+                                                    price={price}
+                                                    data={data}
+                                                    onAddressSubmit={this.onAddressSubmit}
+                                                    requestRideFn={requestRideFn}
+                                                    nearbyRide={nearbyRide}
+                                                    acceptRideFn={acceptRideFn}
+                                                />
+                                            )
+                                        }
+                                                </Mutation>
+);
+}}
             </Query>
                         )}
                             </Mutation>
@@ -146,23 +178,23 @@ class HomeContainer extends React.Component<IProps, IState> {
         );
     }
     public toggleMenu = () => {
-        this.setState(state => {
-            return {
-                isMenuOpen: !state.isMenuOpen
-            };
-        });
-    };
+    this.setState(state => {
+        return {
+            isMenuOpen: !state.isMenuOpen
+        };
+    });
+};
     public handleGeoSucces = (positon: Position) => {
-        const {
-            coords: { latitude, longitude }
-        } = positon;
-        this.setState({
-            lat: latitude,
-            lng: longitude
-        });
+    const {
+        coords: { latitude, longitude }
+    } = positon;
+    this.setState({
+        lat: latitude,
+        lng: longitude
+    });
     this.getFromAdress(latitude, longitude);
-        this.loadMap(latitude, longitude);
-    };
+    this.loadMap(latitude, longitude);
+};
     public getFromAdress = async (lat: number, lng: number) => {
     const address = await reverseGeoCode(lat, lng);
     if (address) {
@@ -172,156 +204,156 @@ class HomeContainer extends React.Component<IProps, IState> {
     }
 };
     public loadMap = (lat, lng) => {
-        const { google } = this.props;
-        const maps = google.maps;
-        const mapNode = ReactDOM.findDOMNode(this.mapRef.current);
+    const { google } = this.props;
+    const maps = google.maps;
+    const mapNode = ReactDOM.findDOMNode(this.mapRef.current);
     if (!mapNode) {
         this.loadMap(lat, lng);
         return;
     }
-        const mapConfig: google.maps.MapOptions = {
-            center: {
-                lat,
-                lng
-            },
-            disableDefaultUI: true,
-            zoom: 13
-        };
-        this.map = new maps.Map(mapNode, mapConfig);
-        const userMarkerOptions: google.maps.MarkerOptions = {
-            icon: {
-                path: maps.SymbolPath.CIRCLE,
-                scale: 7
-            },
+    const mapConfig: google.maps.MapOptions = {
+        center: {
+            lat,
+            lng
+        },
+        disableDefaultUI: true,
+        zoom: 13
+    };
+    this.map = new maps.Map(mapNode, mapConfig);
+    const userMarkerOptions: google.maps.MarkerOptions = {
+        icon: {
+            path: maps.SymbolPath.CIRCLE,
+            scale: 7
+        },
+        position: {
+            lat,
+            lng
+        }
+    };
+    this.userMarker = new maps.Marker(userMarkerOptions);
+    this.userMarker.setMap(this.map);
+    const watchOptions: PositionOptions = {
+        enableHighAccuracy: true
+    };
+    navigator.geolocation.watchPosition(
+        this.handleGeoWatchSuccess,
+        this.handleGeoWatchError,
+        watchOptions
+    );
+};
+    public handleGeoWatchSuccess = (position: Position) => {
+    const { reportLocation } = this.props;
+    const {
+        coords: { latitude, longitude }
+    } = position;
+    this.userMarker.setPosition({ lat: latitude, lng: longitude });
+    this.map.panTo({ lat: latitude, lng: longitude });
+    reportLocation({
+        variables: {
+            lat: parseFloat(latitude.toFixed(10)),
+            lng: parseFloat(longitude.toFixed(10))
+        }
+    });
+};
+    public handleGeoWatchError = () => {
+    console.log("Error watching you");
+};
+    public handleGeoError = () => {
+    console.log("No location");
+};
+    public onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const {
+        target: { name, value }
+    } = event;
+    this.setState({
+        [name]: value
+    } as any);
+};
+    public onAddressSubmit = async () => {
+    const { toAddress } = this.state;
+    const { google } = this.props;
+    const maps = google.maps;
+    const result = await geoCode(toAddress);
+    if (result !== false) {
+        const { lat, lng, formatted_address: formatedAddress } = result;
+        if (this.toMarker) {
+            this.toMarker.setMap(null);
+        }
+        const toMarkerOptions: google.maps.MarkerOptions = {
             position: {
                 lat,
                 lng
             }
         };
-        this.userMarker = new maps.Marker(userMarkerOptions);
-        this.userMarker.setMap(this.map);
-        const watchOptions: PositionOptions = {
-            enableHighAccuracy: true
-        };
-        navigator.geolocation.watchPosition(
-            this.handleGeoWatchSuccess,
-            this.handleGeoWatchError,
-            watchOptions
-        );
-    };
-    public handleGeoWatchSuccess = (position: Position) => {
-        const { reportLocation } = this.props;
-        const {
-            coords: { latitude, longitude }
-        } = position;
-        this.userMarker.setPosition({ lat: latitude, lng: longitude });
-        this.map.panTo({ lat: latitude, lng: longitude });
-        reportLocation({
-            variables: {
-                lat: parseFloat(latitude.toFixed(10)),
-                lng: parseFloat(longitude.toFixed(10))
-            }
-        });
-    };
-    public handleGeoWatchError = () => {
-        console.log("Error watching you");
-    };
-    public handleGeoError = () => {
-        console.log("No location");
-    };
-    public onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const {
-            target: { name, value }
-        } = event;
-        this.setState({
-            [name]: value
-        } as any);
-    };
-    public onAddressSubmit = async () => {
-        const { toAddress } = this.state;
-        const { google } = this.props;
-        const maps = google.maps;
-        const result = await geoCode(toAddress);
-        if (result !== false) {
-            const { lat, lng, formatted_address: formatedAddress } = result;
-            if (this.toMarker) {
-                this.toMarker.setMap(null);
-            }
-            const toMarkerOptions: google.maps.MarkerOptions = {
-                position: {
-                    lat,
-                    lng
-                }
-            };
-            this.toMarker = new maps.Marker(toMarkerOptions);
-            this.toMarker.setMap(this.map);
-            const bounds = new maps.LatLngBounds();
-            bounds.extend({ lat, lng });
-            bounds.extend({ lat: this.state.lat, lng: this.state.lng });
-            this.map.fitBounds(bounds);
-            this.setState(
-                {
-                    toAddress: formatedAddress,
-                    toLat: lat,
-                    toLng: lng
-                },
-                this.createPath
-            );
-        }
-    };
-    public createPath = () => {
-        const { toLat, toLng, lat, lng } = this.state;
-        if (this.directions) {
-            this.directions.setMap(null);
-        }
-        const renderOptions: google.maps.DirectionsRendererOptions = {
-            polylineOptions: {
-                strokeColor: "#000"
+        this.toMarker = new maps.Marker(toMarkerOptions);
+        this.toMarker.setMap(this.map);
+        const bounds = new maps.LatLngBounds();
+        bounds.extend({ lat, lng });
+        bounds.extend({ lat: this.state.lat, lng: this.state.lng });
+        this.map.fitBounds(bounds);
+        this.setState(
+            {
+                toAddress: formatedAddress,
+                toLat: lat,
+                toLng: lng
             },
-            suppressMarkers: true
-        };
-        this.directions = new google.maps.DirectionsRenderer(renderOptions);
-        const directionsService: google.maps.DirectionsService = new google.maps.DirectionsService();
-        const to = new google.maps.LatLng(toLat, toLng);
-        const from = new google.maps.LatLng(lat, lng);
-        const directionsOptions: google.maps.DirectionsRequest = {
-            destination: to,
-            origin: from,
+            this.createPath
+        );
+    }
+};
+    public createPath = () => {
+    const { toLat, toLng, lat, lng } = this.state;
+    if (this.directions) {
+        this.directions.setMap(null);
+    }
+    const renderOptions: google.maps.DirectionsRendererOptions = {
+        polylineOptions: {
+            strokeColor: "#000"
+        },
+        suppressMarkers: true
+    };
+    this.directions = new google.maps.DirectionsRenderer(renderOptions);
+    const directionsService: google.maps.DirectionsService = new google.maps.DirectionsService();
+    const to = new google.maps.LatLng(toLat, toLng);
+    const from = new google.maps.LatLng(lat, lng);
+    const directionsOptions: google.maps.DirectionsRequest = {
+        destination: to,
+        origin: from,
         travelMode: google.maps.TravelMode.DRIVING
-        };
-        directionsService.route(directionsOptions, this.handleRouteRequest);
     };
+    directionsService.route(directionsOptions, this.handleRouteRequest);
+};
     public handleRouteRequest = (
-        result: google.maps.DirectionsResult,
-        status: google.maps.DirectionsStatus
-    ) => {
-        if (status === google.maps.DirectionsStatus.OK) {
-            const { routes } = result;
-            const {
-                distance: { text: distance },
-                duration: { text: duration }
-            } = routes[0].legs[0];
-            this.directions.setDirections(result);
-            this.directions.setMap(this.map);
-            this.setState(
-                {
-                    distance,
-                    duration
-                },
-                this.setPrice
-            );
-        } else {
+    result: google.maps.DirectionsResult,
+    status: google.maps.DirectionsStatus
+) => {
+    if (status === google.maps.DirectionsStatus.OK) {
+        const { routes } = result;
+        const {
+            distance: { text: distance },
+            duration: { text: duration }
+        } = routes[0].legs[0];
+        this.directions.setDirections(result);
+        this.directions.setMap(this.map);
+        this.setState(
+            {
+                distance,
+                duration
+            },
+            this.setPrice
+        );
+    } else {
         toast.error("There is no route there, you have to swim ");
-        }
-    };
+    }
+};
     public setPrice = () => {
-        const { distance } = this.state;
-        if (distance) {
-            this.setState({
-                price: Number(parseFloat(distance.replace(",", "")) * 3).toFixed(2)
-            });
-        }
-    };
+    const { distance } = this.state;
+    if (distance) {
+        this.setState({
+            price: Number(parseFloat(distance.replace(",", "")) * 3).toFixed(2)
+        });
+    }
+};
     public handleNearbyDrivers = (data: {} | getDrivers) => {
     if ("GetNearbyDrivers" in data) {
         const {
