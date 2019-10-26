@@ -43,14 +43,21 @@ class RideContainer extends React.Component<IProps> {
                             if (!subscriptionData.data) {
                                 return prev;
                             }
-                            console.log(prev, subscriptionData);
+                            const {
+                                data: {
+                                    RideStatusSubscription: { status }
+                                }
+                            } = subscriptionData;
+                            if (status === "FINISHED") {
+                                window.location.href = "/";
+                            }
                         }
                     };
                     subscribeToMore(subscribeOptions);
                     return (
                         <Mutation<updateRide, updateRideVariables >
                         mutation= { UPDATE_RIDE_STATUS }
-                    refetchQueries = { GET_RIDE }
+                        // refetchQueries = { { query: GET_RIDE, variables: {rideId}} }
                         >
                         {
                             updateRideFn => (
@@ -64,11 +71,12 @@ class RideContainer extends React.Component<IProps> {
                         }
                                 </Mutation>
 );
-}}
-                    </Query>
+}
+}
+                    </Query >
                 )
     }
-            </Query>
+            </Query >
         );
     }
 }
