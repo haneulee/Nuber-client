@@ -42,12 +42,14 @@ const wsLink = new WebSocketLink({
         connectionParams: {
             "X-JWT": getToken()
         },
-        reconnect: true
+        reconnect: true,
+        timeout: 5000000000
     },
     uri: isDev
         ? "ws://localhost:4000/subscription"
         : "ws://nuberserver.now.sh/subscription"
 });
+// wss://subscriptions.ap-northeast-1.graph.cool/v1/###
 
 const combinedLinks = split(
     ({ query }) => {
