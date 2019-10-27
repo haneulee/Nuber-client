@@ -34,7 +34,7 @@ const authMiddleware = new ApolloLink((operation: Operation, forward: any) => {
 const httpLink = new HttpLink({
     uri: isDev
         ? "http://localhost:4000/graphql"
-        : "https://nuberserver.now.sh/graphql"
+        : "https://nuber-test.herokuapp.com/graphql"
 });
 
 const wsLink = new WebSocketLink({
@@ -46,8 +46,8 @@ const wsLink = new WebSocketLink({
         timeout: 5000000000
     },
     uri: isDev
-        ? "ws://localhost:4000/subscription"
-        : "ws://nuberserver.now.sh/subscription"
+        ? "wss://localhost:4000/subscription"
+        : "wss://nuber-test.herokuapp.com/subscription"
 });
 // wss://subscriptions.ap-northeast-1.graph.cool/v1/###
 
